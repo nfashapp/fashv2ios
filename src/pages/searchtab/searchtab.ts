@@ -16,6 +16,7 @@ import { Subject } from "rxjs/Subject";
 import { Observable } from "rxjs/Rx";
 import { Media, MediaObject } from '@ionic-native/media';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { SocialSharing } from '@ionic-native/social-sharing';
 
 @Component({
   selector: 'page-searchtab',
@@ -23,7 +24,13 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
 })
 @Injectable()
 export class SearchtabPage {
-  allProducts:any = []; 
+  charSearch: any;
+  pages(arg0: any): any {
+    throw new Error("Method not implemented.");
+  }
+  pagenoinc:any = 1;
+  length: number;
+  allProducts: any = [];
   /*********** variables for music player */
   index;
   bit: boolean = true;
@@ -33,8 +40,7 @@ export class SearchtabPage {
   audioIndex;
   setvarNow: any;
   tracknow: boolean = true;
-  audurl; audio;playsong:any = 0;
-
+  audurl; audio; playsong: any = 0;
 
   constructor(
     public navCtrl: NavController,
@@ -46,20 +52,22 @@ export class SearchtabPage {
     public events: Events,
     public nav: Nav,
     public media: Media,
-    public inappBrowser: InAppBrowser
+    public inappBrowser: InAppBrowser,
+    private socialSharing: SocialSharing,
 
   ) {
-    if(localStorage.getItem('currenttrack')){
+    if (localStorage.getItem('currenttrack')) {
       this.currentTrack = JSON.parse(localStorage.getItem('currenttrack'));
       console.log(this.currentTrack);
-      }
-      this.setvarNow="playTrack";
+    }
+    this.setvarNow = "playTrack";
     events.subscribe('page', (myFav) => {
       console.log(myFav);
       clearInterval(this.appsetting.interval);
-      
+
     })
   }
+
   protected resumeHalted = false;
   protected resumeSubject = new Subject<any>();
 
@@ -73,10 +81,13 @@ export class SearchtabPage {
     }, 2000);
   }
 
-  SearchBrand(char,kk) {
-    console.log(char);
-    console.log(kk);
+  SearchBrand(char) {
+    console.log(char.length);
     var aa = this;
+    this.charSearch = char;
+    this.allProducts = [];
+    this.pagenoinc = 1;
+    if(char.length > 0){
     let headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
     let options = new RequestOptions({ headers: headers });
@@ -91,57 +102,150 @@ export class SearchtabPage {
       var serialized = this.serializeObj(postdata);
 
       var Loading = this.loadingCtrl.create({
-        content: 'Please wait...'
+        spinner: 'bubbles',
       });
-
-      this.http.post(this.appsetting.myGlobalVar + 'users/searchbrandfromapp', serialized, options)
+      Loading.present().then(() => {
+      this.http.post(this.appsetting.myGlobalVar + 'users/firstsearchbrandfromapp', serialized, options)
         .map(res => res.json()).subscribe(data => {
           Loading.dismiss();
           console.log(data);
           if (data.status == 0) {
-            this.allProducts = data.data;
-            // data.data.forEach(function(value,key){
-            //   console.log(value);
-            //   if(value.Product.image == null || value.Product.name == null){
-            //      /*********************** */
-            //      if (value.ShopScrap.image != null) {
-            //       console.log(value.ShopScrap.image);
-            //       var search = value.ShopScrap.image.search('http://');
-            //       var searchhttps = value.ShopScrap.image.search('https://');
-            //       if (search >= 0 || searchhttps >= 0) {
-            //         //value.Lookbook.brandlink = 1;
-            //       } else {
-            //         value.ShopScrap.image = 'https:' + value.ShopScrap.image;
-            //       }
-            //     }
-            //     /*********************** */
-            //     aa.allProducts.push(value.ShopScrap)
-            //   }else{
-            //      /*********************** */
-            //      if (value.Product.image != null) {
-            //       console.log(value.Product.image);
-            //       var search = value.Product.image.search('http://');
-            //       var searchhttps = value.Product.image.search('https://');
-            //       if (search >= 0 || searchhttps >= 0) {
-            //         //value.Lookbook.brandlink = 1;
-            //       } else {
-            //         value.Product.image = 'https:' + value.Product.image;
-            //       }
-            //     }
-
-            //     /*********************** */
-            //     aa.allProducts.push(value.Product)
-            //   }
-            //   console.log(aa.allProducts);
-            // });
+            this.pages = data.pages;
+            data.data.forEach(function (value, key) { 
+              console.log(value);
+              /*********************** */
+              if (value[0].image != null) {
+                console.log(value[0].image);
+                var search = value[0].image.search('http://');
+                var searchhttps = value[0].image.search('https://');
+                if (search >= 0 || searchhttps >= 0) {
+                  //value.Lookbook.brandlink = 1;
+                } else {
+                  value[0].image = 'https:' + value[0].image;
+                }
+              }
+              /*********************** */
+              aa.allProducts.push(value[0]);
+            });
+            
+            console.log(aa.allProducts);
           } else {
             this.allProducts = [];
             this.showToast('No products added to My Favorites yet');
           }
-          this.events.publish('haveSeen', 'yes');
+          
         })
+      });
     }
+  }else{
+    this.allProducts = [];
   }
+  }
+ /************ this function is used for pagination ********************/
+ public nextSearchProduct() {
+   var aa = this;
+  let headers = new Headers();
+  headers.append('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+  let options = new RequestOptions({ headers: headers });
+  var user_id = localStorage.getItem("USERID");
+  console.log(this.pages);
+  if (this.pagenoinc < this.pages) {
+    this.pagenoinc++;
+  } 
+  var postdata = {
+    search: this.charSearch,
+    pages: this.pagenoinc
+  };
+  console.log(postdata);
+  var serialized = this.serializeObj(postdata);
+  this.http.post(this.appsetting.myGlobalVar + 'users/searchbrandfromapp', serialized, options).map(res => res.json()).subscribe(data => {
+    console.log(data)
+    if (data.data) {
+      this.length = 1;
+      data.data.forEach(function (value, key) { 
+        console.log(value);
+        /*********************** */
+        if (value[0].image != null) {
+          console.log(value[0].image);
+          var search = value[0].image.search('http://');
+          var searchhttps = value[0].image.search('https://');
+          if (search >= 0 || searchhttps >= 0) {
+          } else {
+            value[0].image = 'https:' + value[0].image;
+          }
+        }
+        /*********************** */
+        aa.allProducts.push(value[0]);
+      });
+    } else {
+      this.length = 0;
+    }
+    
+    console.log(this.allProducts);
+  })
+}
+
+myFavourite(id,url,aff) {
+  var user_id = localStorage.getItem('USERID');
+  if (user_id == null || undefined) {
+    this.ConfirmUser();
+  } else {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+    let options = new RequestOptions({ headers: headers });
+    var postdata = {
+      productid: id,
+      userid: user_id,
+      link: url,
+      affiliate: parseInt(aff)
+    };
+    console.log(postdata);
+    var serialized = this.serializeObj(postdata);
+
+    var Loading = this.loadingCtrl.create({
+      spinner: 'bubbles',
+      showBackdrop: false,
+      cssClass: 'loader'
+    });
+
+    this.http.post(this.appsetting.myGlobalVar + 'lookbooks/addtofavourite', serialized, options).map(res => res.json()).subscribe(data => {
+      Loading.dismiss();
+      console.log(data)
+      if (data.status == 0) {
+        this.showToast(data.msg);
+        console.log(data.bit)
+        if (data.bit == 1) {
+          this.events.publish('Liked', '2');  // only for the stacks, so that Red dot remains in the next card
+        } else {
+          this.events.publish('Liked', '0');
+        }
+      } else {
+        this.showToast(data.msg);
+      }
+
+
+    })
+  }
+}
+socailsharing(link) {
+  console.log(link);
+  this.socialSharing.share(null, null, null, link)
+    .then(() => {
+      //alert("success");
+    },
+    () => {
+      //	alert("failed");
+    })
+}
+
+public doInfinite(infiniteScroll: any) {
+  console.log(infiniteScroll)
+  this.nextSearchProduct();
+  setTimeout(() => {
+    infiniteScroll.complete()
+
+  }, 500)
+};
 
   ConfirmUser() {
     let alert = this.alertCtrl.create({
@@ -178,97 +282,103 @@ export class SearchtabPage {
     toast.present();
   }
 
- /************ function for play audio ********/
- playTrack(track) {
-  this.bit = true;
-  //var aa = this;
-  if(this.appsetting.audio != undefined)
-    {
+  /************ function for play audio ********/
+  playTrack(track) {
+    this.bit = true;
+    //var aa = this;
+    if (this.appsetting.audio != undefined) {
       this.currentTrack = track;
       this.appsetting.audio.play();
-    }else{
+    } else {
       track.loaded = true;
       track.playing = true;
       this.currentTrack = track;
       const file: MediaObject = this.media.create(this.currentTrack.music);
-      localStorage.setItem('currenttrack',JSON.stringify(this.currentTrack));
+      localStorage.setItem('currenttrack', JSON.stringify(this.currentTrack));
       this.appsetting.audio = file;
       this.appsetting.audio.play();
     }
 
-  this.appsetting.audio.onSuccess.subscribe(() => {
-  if (this.tracknow == true) {
-    //localStorage.setItem('currenttrack',this.currentTrack);
-      this.nexttTrack();
-    }
-  }, err => {
-  })
+    this.appsetting.audio.onSuccess.subscribe(() => {
+      if (this.tracknow == true) {
+        //localStorage.setItem('currenttrack',this.currentTrack);
+        this.nexttTrack();
+      }
+    }, err => {
+    })
 
-}
+  }
 
-pauseTrack(track) {
-  track.playing = false;
-  this.appsetting.audio.pause();
-  this.currentTrack = track;
-}
+  pauseTrack(track) {
+    track.playing = false;
+    this.appsetting.audio.pause();
+    this.currentTrack = track;
+  }
 
-pausetyTrack(track) {
-  this.bit = false;
-  track.playing = false;
-  this.appsetting.audio.pause();
-  this.currentTrack = track;
-}
+  pausetyTrack(track) {
+    this.bit = false;
+    track.playing = false;
+    this.appsetting.audio.pause();
+    this.currentTrack = track;
+  }
 
-nexttTrack() {
-  let index = this.appsetting.tracks.indexOf(this.currentTrack);
-  index >= this.appsetting.tracks.length - 1 ? index = 0 : index++;
-  this.appsetting.audio=undefined;
-  this.playTrack(this.appsetting.tracks[index]);
-}
+  nexttTrack() {
+    let index = this.appsetting.tracks.indexOf(this.currentTrack);
+    index >= this.appsetting.tracks.length - 1 ? index = 0 : index++;
+    this.appsetting.audio = undefined;
+    this.playTrack(this.appsetting.tracks[index]);
+  }
 
-nextTrack() {
-  this.setvarNow = "nextTrack";
-  let index = this.appsetting.tracks.indexOf(this.currentTrack);
-  index >= this.appsetting.tracks.length - 1 ? index = 0 : index++;
-  this.appsetting.audio=undefined;
-  this.playTrack(this.appsetting.tracks[index]);
-}
+  nextTrack() {
+    this.setvarNow = "nextTrack";
+    let index = this.appsetting.tracks.indexOf(this.currentTrack);
+    index >= this.appsetting.tracks.length - 1 ? index = 0 : index++;
+    this.appsetting.audio = undefined;
+    this.playTrack(this.appsetting.tracks[index]);
+  }
 
-prevTrack() {
-  this.setvarNow = "prevTrack";
-  let index = this.appsetting.tracks.indexOf(this.currentTrack);
-  index > 0 ? index-- : index = this.appsetting.tracks.length - 1;
-  this.appsetting.audio=undefined;
-  this.playTrack(this.appsetting.tracks[index]);
-}
-/*************** In App purchase for brands *********************/
-InAppPurchage(link){
-  if(link != null && link != ""){
-     var target = '_blank';
-  var options = 'location=no';
-  var brandsite = this.inappBrowser.create(link, target, options);
-  console.log(link);
-  console.log(target);
-  console.log(brandsite);
-  brandsite.on('loadstart').subscribe((e) => {
-    console.log(e);
-    let url = e.url;
-    console.log(url);
-  }, err => {
-    console.log("InAppBrowser loadstart Event Error: " + err);
-  });
+  prevTrack() {
+    this.setvarNow = "prevTrack";
+    let index = this.appsetting.tracks.indexOf(this.currentTrack);
+    index > 0 ? index-- : index = this.appsetting.tracks.length - 1;
+    this.appsetting.audio = undefined;
+    this.playTrack(this.appsetting.tracks[index]);
+  }
+  /*************** In App purchase for brands *********************/
+  InAppPurchage(link) {
+    if (link != null && link != "") {
+      var target = '_blank';
+      var options = 'location=no';
+    //   var Loading = this.loadingCtrl.create({
+    //     content: "FASH taking you to your interested item!",
+    //     duration: 5000
+    //  });
+    //  Loading.present().then(() => {
+      var brandsite = this.inappBrowser.create(link, target, options);
+      console.log(link);
+      console.log(target);
+      console.log(brandsite);
+      brandsite.on('loadstart').subscribe((e) => {
 
-  brandsite.on('exit').subscribe((e) => {
-  })
-}else{
-   let toast = this.toastCtrl.create({
-        message: 'Target url empty.',
-        duration: 3000,
-        position: 'top'
+        console.log(e);
+        let url = e.url;
+        console.log(url);
+      }, err => {
+        console.log("InAppBrowser loadstart Event Error: " + err);
       });
-      toast.present();
-}
-}
+
+      brandsite.on('exit').subscribe((e) => {
+      })
+   // })
+    } else {
+      // let toast = this.toastCtrl.create({
+      //   message: 'Target url empty.',
+      //   duration: 3000,
+      //   position: 'top'
+      // });
+      // toast.present();
+    }
+  }
   serializeObj(obj) {
     var result = [];
     for (var property in obj)

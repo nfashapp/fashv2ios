@@ -1,6 +1,6 @@
 page-birthday {
     .gender_outer {
-        padding-top: 35vh;
+        padding-top: 15vh;
         text-align: center;
     }
     .gender_outer .datetime{
@@ -21,18 +21,22 @@ page-birthday {
         text-transform: uppercase;
         letter-spacing: 3.6px;
     }
-.nextbtn {
-    padding: 5px;
-    float: left;
-    width: 100%;
-    background: none;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-}
+    .nextbtn {
+        padding: 5px;
+        font-family: futuraheavy;
+        float: left;
+        width: 100%;
+        background: none;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 3.6px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
 
 .datetime-text{
     color: #fff !important;
+    text-transform: uppercase !important;
 }
 
 .datetime::-moz-placeholder {
@@ -55,6 +59,16 @@ page-birthday {
     bottom: 0 !important;
     margin: auto !important;
 }
-
+.gendertext{
+    width: 100%;
+    font-size: 15px;
+    text-align: center;
+    margin-top: 15vh;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+ion-footer.footer.footer-ios {
+    bottom: 72px !important;
+}
 
 }

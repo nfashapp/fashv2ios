@@ -31,21 +31,25 @@
   </ion-refresher>
 <ion-grid>
 <ion-row>
-  <ion-col col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2 *ngFor="let product of allProducts" (click)="InAppPurchage(product.link)">
+  <ion-col col-6 col-sm-6 col-md-4 col-lg-3 col-xl-2 *ngFor="let product of allProducts">
      <div class="product_box">
       <div class="img_outers">
         <img [src]="product?.image"> 
-        <div class="overlay"></div>
+        <div class="overlay" (click)="InAppPurchage(product.link)"></div>
       </div>
       
       <div class="content_pro">
-        <div class="favpro_title">${{product?.price | number: '1.2-2'}}</div>
+        <div class="favpro_title" (click)="InAppPurchage(product.link)">${{product?.price | number: '1.2-2'}}</div>
       </div>
       <div class="cart_sec">
         <div class="cart_title">{{product?.name}}</div>
-        <button style="width: 20%; float: right;" ion-button color="dark" small clear icon-only>
-          <ion-icon style="padding:0 0.4em;" name="md-cart"></ion-icon>
+        <button style="width: 14%; float: right; margin-left:0; margin-right:0;" ion-button color="dark" small clear icon-only (click)="socailsharing(product.link)">
+          <ion-icon style="padding:0; font-size:13px;"><img style="width:15px !important; min-height: auto; height: auto;" src="assets/images/hanger.png"></ion-icon>
         </button>
+        <button style="width: 14%; float: right; margin-left:0; margin-right:0;" ion-button color="dark" small clear icon-only (click)="RemoveFromFavs(product.id)">
+          <ion-icon style="padding:0 0.4em; font-size:15px;" name="md-heart"></ion-icon>
+        </button>
+        
       </div>
     </div>
 

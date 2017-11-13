@@ -19,6 +19,7 @@ import { InAppBrowser } from '@ionic-native/in-app-browser';
 import 'rxjs/Rx';
 import { Events } from 'ionic-angular';
 import { Slides } from 'ionic-angular';
+import { SocialSharing } from '@ionic-native/social-sharing';
 
 // import {
 //   StackConfig,
@@ -77,7 +78,8 @@ export class CardswipePage {
     public media: Media,
     public file: File,
     public platform: Platform,
-    public inappBrowser: InAppBrowser
+    public inappBrowser: InAppBrowser,
+    private socialSharing: SocialSharing,
   ) {
     this.setvarNow = "playTrack";
     platform.ready().then(() => {
@@ -679,13 +681,19 @@ export class CardswipePage {
 
   /*************** In App purchase for brands *********************/
   InAppPurchage(link) {
-    if (link != null && link != '') {
+    if (link != null && link != "") {
       var target = '_blank';
       var options = 'location=no';
+    //   var Loading = this.loadingCtrl.create({
+    //     content: "FASH taking you to your interested item!",
+    //     duration: 5000
+    //  });
+    //   Loading.present().then(() => {
       var brandsite = this.inappBrowser.create(link, target, options);
       console.log(link);
       console.log(target);
       console.log(brandsite);
+      
       brandsite.on('loadstart').subscribe((e) => {
         console.log(e);
         let url = e.url;
@@ -696,13 +704,26 @@ export class CardswipePage {
 
       brandsite.on('exit').subscribe((e) => {
       })
+   // })
     } else {
-
+      //  let toast = this.toastCtrl.create({
+      //       message: 'Target url empty.',
+      //       duration: 3000,
+      //       position: 'top'
+      //     });
+      //     toast.present();
     }
-
-
   }
-
+  socialsharing(link) {
+    console.log(link);
+		this.socialSharing.share(null, null, null, link)
+			.then(() => {
+				//alert("success");
+			},
+			() => {
+				//	alert("failed");
+			})
+  }
   ionViewDidEnter() {
     console.log('rahul');
     console.log(window.navigator.onLine);

@@ -1,16 +1,15 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, LoadingController, AlertController,ToastController,Platform,Events,MenuController } from 'ionic-angular';
+import { NavController, NavParams, LoadingController, AlertController, ToastController, Platform, Events, MenuController } from 'ionic-angular';
 import { ProductcardPage } from '../productcard/productcard';
 import { Http, Headers, RequestOptions } from '@angular/http';
 import 'rxjs/add/operator/map';
 import { Appsetting } from '../../providers/appsetting';
 import { CardswipePage } from '../cardswipe/cardswipe';
 import { ProfilePage } from '../profile/profile';
- import { GenderPage } from '../gender/gender';
-import { Media , MediaObject } from '@ionic-native/media';
-import {BirthdayPage} from '../birthday/birthday';
-import {ConfirmationPage} from '../confirmation/confirmation';
-import { CodePush , SyncStatus} from '@ionic-native/code-push';
+import { GenderPage } from '../gender/gender';
+import { Media, MediaObject } from '@ionic-native/media';
+import { BirthdayPage } from '../birthday/birthday';
+import { ConfirmationPage } from '../confirmation/confirmation';
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -18,9 +17,9 @@ import { CodePush , SyncStatus} from '@ionic-native/code-push';
 
 export class HomePage {
   profile;
-  srcImage;length;
-  response; IDtobe;profileimage;brandlink:any = 0;
-  public start;
+  srcImage; length;
+  response:any = []; IDtobe; profileimage; brandlink: any = 0;
+  public start; pages;pagenoinc:any = 0;
 
   constructor(public navCtrl: NavController,
     public http: Http,
@@ -30,46 +29,18 @@ export class HomePage {
     public navParams: NavParams,
     public media: Media,
     public platform: Platform,
-     public toastCtrl: ToastController,
-     private codePush: CodePush, 
-     public menu: MenuController
-  
+    public toastCtrl: ToastController,
+    public menu: MenuController
+
   ) {
-    // this.platform.ready().then(() => {
-      
-    //   this.codePush.sync({}, (progress) => {
- 
-    //   }).subscribe((status) => {
-    //     if(status == SyncStatus.CHECKING_FOR_UPDATE)
-    //       alert("checking for update");
-    //     if(status == SyncStatus.DOWNLOADING_PACKAGE)
-    //       alert("downloading package");
-    //     if(status == SyncStatus.IN_PROGRESS)
-    //       alert("IN PROGRESS");
-    //     if(status == SyncStatus.INSTALLING_UPDATE)
-    //       alert("installing update");
-    //     if(status == SyncStatus.UP_TO_DATE)
-    //       alert("UP TO DATE");
-    //     if(status == SyncStatus.UPDATE_INSTALLED)
-    //       alert("update installed");
-    //     if(status == SyncStatus.ERROR)
-    //       alert("error");
- 
- 
- 
-    //   })
-       
-    //  })
 
-
-
-    this.ionViewDidLoad(); 
+    this.ionViewDidLoad();
     if (this.navParams.get('checkout') == 'yes') {
       console.log('CHECKOUT');
     }
 
     console.log('YES UPDATED');
-    if(localStorage.getItem("USERID")){
+    if (localStorage.getItem("USERID")) {
       this.image() // if a user is logged in
       this.srcImage = null;
     }
@@ -81,7 +52,7 @@ export class HomePage {
       this.lookbooklist();
     });
   }
-  
+
   public lookbooklist() {
     clearInterval(this.appsetting.interval);
     let headers = new Headers();
@@ -93,54 +64,87 @@ export class HomePage {
     };
     console.log(postdata);
     var serialized = this.serializeObj(postdata);
-    this.http.post(this.appsetting.myGlobalVar + 'lookbooks/listofaffiliates', serialized, options).map(res => res.json()).subscribe(data => {
+    this.http.post(this.appsetting.myGlobalVar + 'lookbooks/firstlistofaffiliates', serialized, options).map(res => res.json()).subscribe(data => {
       console.log(data)
-      if(data.data){
+      if (data.data) {
+        console.log(data.pages);
         this.length = 1;
-      for(var i=0;i<data.data.length;i++){
-        if(data.data[i].Lookbook.brand){
-           console.log(data.data[i].Lookbook.brand.search('http://'));
-        var search = data.data[i].Lookbook.brand.search('http://');
-        var searchhttps = data.data[i].Lookbook.brand.search('https://');
-         if(search >= 0 || searchhttps >= 0){
-             data.data[i].Lookbook.brandlink = 1;
-            }else{
+        this.pages = data.pages;
+        for (var i = 0; i < data.data.length; i++) {
+          if (data.data[i].Lookbook.brand) {
+            console.log(data.data[i].Lookbook.brand.search('http://'));
+            var search = data.data[i].Lookbook.brand.search('http://');
+            var searchhttps = data.data[i].Lookbook.brand.search('https://');
+            if (search >= 0 || searchhttps >= 0) {
+              data.data[i].Lookbook.brandlink = 1;
+            } else {
               data.data[i].Lookbook.brandlink = 0;
             }
+          }
+          this.response.push(data.data[i].Lookbook);
         }
-       
+      } else {
+        this.length = 0;
       }
-      }else{
-       this.length = 0;
+      
+      console.log(this.response);
+    })
+  }
+  /************ this function is used for pagination ********************/
+  public nextlookbook() {
+    let headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
+    let options = new RequestOptions({ headers: headers });
+    var user_id = localStorage.getItem("USERID");
+    console.log(this.pages);
+    if (this.pagenoinc < this.pages) {
+      this.pagenoinc++;
+    } 
+    var postdata = {
+      id: user_id,
+      pages: this.pagenoinc
+    };
+    console.log(postdata);
+    var serialized = this.serializeObj(postdata);
+    this.http.post(this.appsetting.myGlobalVar + 'lookbooks/listofaffiliates', serialized, options).map(res => res.json()).subscribe(data => {
+      console.log(data)
+      if (data.data) {
+        this.length = 1;
+        for (var i = 0; i < data.data.length; i++) {
+          if (data.data[i].Lookbook.brand) {
+            console.log(data.data[i].Lookbook.brand.search('http://'));
+            var search = data.data[i].Lookbook.brand.search('http://');
+            var searchhttps = data.data[i].Lookbook.brand.search('https://');
+            if (search >= 0 || searchhttps >= 0) {
+              data.data[i].Lookbook.brandlink = 1;
+            } else {
+              data.data[i].Lookbook.brandlink = 0;
+            }
+          }
+          this.response.push(data.data[i].Lookbook);
+        }
+      } else {
+        this.length = 0;
       }
-      this.response = data.data;
+      
       console.log(this.response);
     })
   }
 
-//   loadPeople() {
-//     return new Promise(resolve => {
-//       // this.peopleService.load(this.start)
-//       // .then(data => {
-        
-//       //   for(let person of data) {
-//       //     this.people.push(person);
-//       //   }
-//         resolve(true);
-//     //   });  
-//      });
-//   }
+  public doInfinite(infiniteScroll: any) {
+    console.log(infiniteScroll)
+    this.nextlookbook();
+    setTimeout(() => {
+      infiniteScroll.complete()
 
-//   doInfinite(infiniteScroll:any) {
-//     console.log('doInfinite, start is currently '+this.start);
-//     this.start+=50;
-//     this.loadPeople().then(()=>{
-//       infiniteScroll.complete();
-//     });
-//  }
+    }, 500)
+  };
+
 
   doRefresh(refresher) {
     console.log('Begin async operation', refresher);
+    this.length = 0;
+    this.response = [];
     this.image();
     this.lookbooklist();
     console.log('refreshed')
@@ -170,8 +174,8 @@ export class HomePage {
       console.log(this.profile)
     })
   }
-  confirmation(){
- this.navCtrl.push(ConfirmationPage);
+  confirmation() {
+    this.navCtrl.push(ConfirmationPage);
   }
   productcardPage(id) {
     var idTobe = id
@@ -180,7 +184,7 @@ export class HomePage {
     this.navCtrl.push(ProductcardPage, { id: idTobe });
   }
 
-  cardswipePage(id,affiliat) {
+  cardswipePage(id, affiliat) {
     var idTobe = id
     console.log(idTobe);
     console.log(affiliat);
@@ -192,8 +196,11 @@ export class HomePage {
   profilePage() {
     this.navCtrl.push(ProfilePage);
   }
-    genderPage() {
+  genderPage() {
     this.navCtrl.push(GenderPage);
+  }
+  BirthdayPage() {
+    this.navCtrl.push(BirthdayPage);
   }
   serializeObj(obj) {
     var result = [];

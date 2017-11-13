@@ -155,31 +155,14 @@ letter-spacing: 0.83px;
     font-family: myfuturabold !important;
 }
 
-// .cart_title {
-//     margin-top: 0;
-//     padding-top: 0;
-//     position: absolute;
-//     top: 12px;
-//     width: 80%;
-//     white-space: nowrap;
-//     overflow: hidden;
-//     height: 16px;
-//     line-height: 9px;
-//     text-overflow: ellipsis;
-//     font-family: futuraheavy;
-//     color: #878787;
-//     font-size: 10px;
-//     letter-spacing: 0.83px;
-// }
-
 .cart_title {
     margin-top: 0;
     padding-top: 0;
     position: absolute;
     top: 7px;
-    width: 80%;
+    width: 70%;
     overflow: hidden;
-    height: 17px;
+    height: 19px;
     line-height: 9px;
     font-family: futuraheavy;
     color: #878787;
@@ -262,6 +245,12 @@ ion-header ion-icon {
 @media screen and (max-height : 320px){
     .product_box{height: 42vh !important;}
 }
+.searchbar-input{
+    background: #fff;
+}
 
+.searchbar {
+    background: rgba(0, 0, 0, 0.2);
+}
 
 }

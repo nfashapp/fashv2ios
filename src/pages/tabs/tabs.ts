@@ -8,6 +8,7 @@ import { Events } from 'ionic-angular';
 import { AfterViewInit, OnInit } from '@angular/core';
 import { SearchPage } from '../search/search';
 import {SearchtabPage} from '../searchtab/searchtab';
+import {ProfilePage} from '../profile/profile';
 
 @Component({
   templateUrl: 'tabs.html'
@@ -16,8 +17,10 @@ import {SearchtabPage} from '../searchtab/searchtab';
 
 export class TabsPage {
   tab1Root = HomePage;
-  tab2Root = SearchtabPage;
-  tab3Root = MyfavoritesPage
+  tab2Root = MyfavoritesPage;
+  // tab2Root = SearchtabPage;
+  tab3Root = ProfilePage;
+  // tab3Root = MyfavoritesPage
   //tab3Root = FittingroomPage;
   // tab4Root = CartPage;
   count: any;
@@ -42,8 +45,6 @@ export class TabsPage {
         this.count = ''; // deleted from favs
       }
     })
-
-
     this.events.subscribe('haveSeen', (bit) => {
       this.count = '';
     }) // event called as soon as user visits the Favorite page

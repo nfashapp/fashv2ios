@@ -27,11 +27,14 @@
 </ion-header>
 
 <ion-content padding>
-
+  <!--******** commented code are so important so don't delete this **********-->
+    <!-- <div class="arrow_direction" *ngIf="checkall != pages">
+        <img src="assets/images/arro.png">
+      </div> -->
 
   <div class="procard_box" *ngIf="allcards">
-    <div class="procard"></div>
-    <div class="procard_inn"></div>
+    <!-- <div class="procard"></div>
+    <div class="procard_inn"></div> -->
     <div class="procard_img slider">
 
       <ion-slides (ionSlideDidChange)="ondrag()">
@@ -42,13 +45,6 @@
             <img *ngIf='res?.Lookbook?.image && res?.Product?.non_products != 1' [src]="res?.Lookbook?.image">
           </div>
            <ion-grid *ngIf='res?.Product?.image' style="position: absolute; padding:0 5px !important; z-index: 999; bottom: 0px; background:#fff; padding: 5px;">
-            <!-- <ion-row>
-              <button style="margin: 0 auto;text-align: center;" ion-button color="dark" small clear icon-only (click)="InAppPurchage()">
-                <ion-icon ios="ios-search" md="md-search"></ion-icon>
-              </button>
-            </ion-row> -->
-            
-            
             <ion-row *ngIf="res?.Product?.name">
               <ion-col col-6 *ngIf='res?.Product?.non_products != 1'>
                 <div class="product_title" (click)="InAppPurchage(res?.Product?.link)">
@@ -57,10 +53,10 @@
                 </div>
               </ion-col>
               <ion-col col-6 *ngIf='res?.Product?.non_products != 1'>
-                <button style="float:right; width: 17px;" ion-button color="dark" small clear icon-only (click)="share(res?.Product?.id)">
+                <button style="float:right; width: 17px;" ion-button color="dark" small clear icon-only (click)="socialsharing(res.Product.link)">
                 <ion-icon style="padding:0;"><img style="width:15px !important; min-height: auto; height: auto;" src="assets/images/hanger.png"></ion-icon>
               </button>
-                <button style="float:right; color: #878787;" ion-button color="dark" small clear icon-only (click)="myFavs(res.Product.id,res[0].favs,res.Product.link )">
+                <button style="float:right; color: #878787;" ion-button color="dark" small clear icon-only (click)="myFavs(res.Product.id,res[0].favs,res.Product.link)">
                 <ion-icon style="padding: 4px;" name="md-heart-outline"></ion-icon>
               </button>
                 <button *ngIf="res?.Product?.price" (click)="InAppPurchage(res?.Product?.link)" style="margin-top:6px;float:right; font-family: futuraheavy; border-color: #979797;color:#878787; padding: 5px; font-size: 13px;"

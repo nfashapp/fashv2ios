@@ -178,7 +178,16 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#00000000', e
     max-height: 100%;
     min-height: inherit;
 }
-
+.arrow_direction {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    z-index: 99999;
+    width: 45px;
+    height: 86px;
+}
 .back-button{
     display: none !important;
 }
